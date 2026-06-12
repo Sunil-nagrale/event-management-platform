@@ -1,0 +1,70 @@
+<div class="row g-3">
+  <div class="col-md-8">
+    <label for="title" class="form-label">Event Title</label>
+    <input type="text" class="form-control" id="title" name="title" value="<%= typeof event !== 'undefined' ? event.title : '' %>" required>
+  </div>
+  <div class="col-md-4">
+    <label for="category" class="form-label">Category</label>
+    <select class="form-select" id="category" name="category" required>
+      <% categories.forEach(function(cat) { %>
+        <option value="<%= cat %>" <%= typeof event !== 'undefined' && event.category === cat ? 'selected' : '' %>><%= getCategoryLabel(cat) %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="col-12">
+    <label for="description" class="form-label">Description</label>
+    <textarea class="form-control" id="description" name="description" rows="5" required><%= typeof event !== 'undefined' ? event.description : '' %></textarea>
+  </div>
+  <div class="col-md-6">
+    <label for="venue" class="form-label">Venue</label>
+    <input type="text" class="form-control" id="venue" name="venue" value="<%= typeof event !== 'undefined' ? event.location.venue : '' %>" required>
+  </div>
+  <div class="col-md-6">
+    <label for="city" class="form-label">City</label>
+    <input type="text" class="form-control" id="city" name="city" value="<%= typeof event !== 'undefined' ? event.location.city : '' %>" required>
+  </div>
+  <div class="col-12">
+    <label for="address" class="form-label">Address</label>
+    <input type="text" class="form-control" id="address" name="address" value="<%= typeof event !== 'undefined' ? event.location.address : '' %>">
+  </div>
+  <div class="col-md-6">
+    <label for="startDate" class="form-label">Start Date & Time</label>
+    <input type="datetime-local" class="form-control" id="startDate" name="startDate"
+      value="<%= typeof event !== 'undefined' ? new Date(event.dateTime.start).toISOString().slice(0,16) : '' %>" required>
+  </div>
+  <div class="col-md-6">
+    <label for="endDate" class="form-label">End Date & Time</label>
+    <input type="datetime-local" class="form-control" id="endDate" name="endDate"
+      value="<%= typeof event !== 'undefined' ? new Date(event.dateTime.end).toISOString().slice(0,16) : '' %>" required>
+  </div>
+  <div class="col-md-4">
+    <label for="capacity" class="form-label">Capacity</label>
+    <input type="number" class="form-control" id="capacity" name="capacity" min="1"
+      value="<%= typeof event !== 'undefined' ? event.capacity : 100 %>" required>
+  </div>
+  <div class="col-md-4">
+    <label for="ticketPrice" class="form-label">Ticket Price (₹)</label>
+    <input type="number" class="form-control" id="ticketPrice" name="ticketPrice" min="0" step="0.01"
+      value="<%= typeof event !== 'undefined' ? event.ticketPrice : 0 %>" required>
+  </div>
+  <div class="col-md-4">
+    <label for="status" class="form-label">Status</label>
+    <select class="form-select" id="status" name="status">
+      <% ['draft','published','cancelled','completed'].forEach(function(s) { %>
+        <option value="<%= s %>" <%= typeof event !== 'undefined' && event.status === s ? 'selected' : '' %>><%= s %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="col-12">
+    <label for="tags" class="form-label">Tags (comma separated)</label>
+    <input type="text" class="form-control" id="tags" name="tags"
+      value="<%= typeof event !== 'undefined' && event.tags ? event.tags.join(', ') : '' %>">
+  </div>
+  <div class="col-12">
+    <label for="image" class="form-label">Event Image</label>
+    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+    <% if (typeof event !== 'undefined' && event.image && event.image.url) { %>
+      <img src="<%= event.image.url %>" class="mt-2 rounded" style="max-height:120px" alt="Current image">
+    <% } %>
+  </div>
+</div>

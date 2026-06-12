@@ -1,0 +1,26 @@
+<div class="container py-4">
+  <h1 class="fw-bold mb-4">Payment History</h1>
+  <div class="card shadow-sm border-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Event</th><th>Amount</th><th>Status</th><th>Payment ID</th><th>Date</th></tr></thead>
+        <tbody>
+          <% if (payments.length === 0) { %>
+            <tr><td colspan="5" class="text-center text-muted py-4">No payments yet.</td></tr>
+          <% } else { %>
+            <% payments.forEach(function(p) { %>
+              <tr>
+                <td><%= p.event ? p.event.title : 'N/A' %></td>
+                <td><%= formatCurrency(p.amount) %></td>
+                <td><span class="badge bg-<%= p.status === 'paid' ? 'success' : 'secondary' %>"><%= p.status %></span></td>
+                <td><small><%= p.razorpayPaymentId || p.razorpayOrderId %></small></td>
+                <td><%= formatDateTime(p.createdAt) %></td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <%- include('../partials/pagination', { pagination, query: {} }) %>
+</div>

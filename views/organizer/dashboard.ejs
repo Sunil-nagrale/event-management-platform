@@ -1,0 +1,66 @@
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card dashboard-stat">
+      <i class="bi bi-calendar3 fs-2 text-primary"></i>
+      <h3><%= stats.myEvents %></h3>
+      <p>My Events</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card dashboard-stat">
+      <i class="bi bi-ticket-perforated fs-2 text-success"></i>
+      <h3><%= stats.totalRegistrations %></h3>
+      <p>Total Registrations</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card dashboard-stat">
+      <i class="bi bi-currency-rupee fs-2 text-warning"></i>
+      <h3><%= formatCurrency(stats.totalRevenue) %></h3>
+      <p>Total Revenue</p>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-transparent d-flex justify-content-between">
+        <h5 class="mb-0">Upcoming Events</h5>
+        <a href="/events/new" class="btn btn-sm btn-primary">Create</a>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% if (upcomingEvents.length === 0) { %>
+          <li class="list-group-item text-muted">No upcoming events.</li>
+        <% } else { %>
+          <% upcomingEvents.forEach(function(event) { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong><%= event.title %></strong><br>
+                <small class="text-muted"><%= formatDateTime(event.dateTime.start) %></small>
+              </div>
+              <a href="/organizer/events/<%= event._id %>/registrations" class="btn btn-sm btn-outline-primary">Registrations</a>
+            </li>
+          <% }); %>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-transparent"><h5 class="mb-0">Recent Registrations</h5></div>
+      <ul class="list-group list-group-flush">
+        <% if (recentRegistrations.length === 0) { %>
+          <li class="list-group-item text-muted">No registrations yet.</li>
+        <% } else { %>
+          <% recentRegistrations.forEach(function(b) { %>
+            <li class="list-group-item">
+              <strong><%= b.user.firstName %> <%= b.user.lastName %></strong> registered for
+              <strong><%= b.event.title %></strong>
+            </li>
+          <% }); %>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</div>

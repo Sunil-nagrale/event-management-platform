@@ -1,0 +1,43 @@
+<div class="container py-4">
+  <h1 class="fw-bold mb-4">My Dashboard</h1>
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="stat-card p-4 text-center">
+        <i class="bi bi-ticket-perforated fs-1 text-primary"></i>
+        <h3 class="mt-2"><%= stats.bookingsCount %></h3>
+        <p class="text-muted mb-0">Registered Events</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="stat-card p-4 text-center">
+        <i class="bi bi-credit-card fs-1 text-success"></i>
+        <h3 class="mt-2"><%= stats.paymentsCount %></h3>
+        <p class="text-muted mb-0">Payments Made</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-transparent d-flex justify-content-between">
+      <h5 class="mb-0">Upcoming Events</h5>
+      <a href="/user/bookings" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <ul class="list-group list-group-flush">
+      <% if (upcomingBookings.length === 0) { %>
+        <li class="list-group-item text-muted text-center py-4">
+          No upcoming events. <a href="/events">Browse events</a>
+        </li>
+      <% } else { %>
+        <% upcomingBookings.forEach(function(b) { %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong><%= b.event.title %></strong><br>
+              <small class="text-muted"><%= formatDateTime(b.event.dateTime.start) %> — <%= b.event.location.city %></small>
+            </div>
+            <code><%= b.ticketNumber %></code>
+          </li>
+        <% }); %>
+      <% } %>
+    </ul>
+  </div>
+</div>

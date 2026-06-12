@@ -1,0 +1,47 @@
+<form action="/admin/users" method="GET" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <input type="text" class="form-control" name="search" placeholder="Search users..." value="<%= query.search || '' %>">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="role">
+      <option value="">All Roles</option>
+      <option value="admin" <%= query.role === 'admin' ? 'selected' : '' %>>Admin</option>
+      <option value="organizer" <%= query.role === 'organizer' ? 'selected' : '' %>>Organizer</option>
+      <option value="attendee" <%= query.role === 'attendee' ? 'selected' : '' %>>Attendee</option>
+    </select>
+  </div>
+  <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+</form>
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% users.forEach(function(user) { %>
+          <tr>
+            <td><%= user.firstName %> <%= user.lastName %></td>
+            <td><%= user.email %></td>
+            <td><span class="badge bg-secondary"><%= user.role %></span></td>
+            <td><%= formatDate(user.createdAt) %></td>
+            <td>
+              <form action="/admin/users/<%= user._id %>/role?_method=PUT" method="POST" class="d-inline">
+                <select name="role" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                  <option value="attendee" <%= user.role === 'attendee' ? 'selected' : '' %>>Attendee</option>
+                  <option value="organizer" <%= user.role === 'organizer' ? 'selected' : '' %>>Organizer</option>
+                  <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                </select>
+              </form>
+              <% if (currentUser._id.toString() !== user._id.toString()) { %>
+                <form action="/admin/users/<%= user._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Delete this user?')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/pagination', { pagination, query: query || {} }) %>

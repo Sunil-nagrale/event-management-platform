@@ -1,0 +1,38 @@
+<form action="/admin/events" method="GET" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <input type="text" class="form-control" name="search" placeholder="Search events..." value="<%= query.search || '' %>">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="status">
+      <option value="">All Status</option>
+      <% ['draft','published','cancelled','completed'].forEach(function(s) { %>
+        <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+</form>
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Title</th><th>Organizer</th><th>Date</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% events.forEach(function(event) { %>
+          <tr>
+            <td><%= event.title %></td>
+            <td><%= event.organizer.firstName %> <%= event.organizer.lastName %></td>
+            <td><%= formatDateTime(event.dateTime.start) %></td>
+            <td><span class="badge bg-<%= getStatusBadge(event.status) %>"><%= event.status %></span></td>
+            <td><%= event.registeredCount %>/<%= event.capacity %></td>
+            <td>
+              <a href="/events/<%= event._id %>" class="btn btn-sm btn-outline-primary">View</a>
+              <a href="/events/<%= event._id %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/pagination', { pagination, query: query || {} }) %>

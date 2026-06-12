@@ -1,0 +1,38 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h1 class="fw-bold mb-4">Contact Us</h1>
+      <p class="text-muted mb-4">Have questions or feedback? We'd love to hear from you.</p>
+
+      <form action="/contact" method="POST" class="needs-validation">
+        <input type="hidden" name="_redirect" value="/contact">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="subject" class="form-label">Subject</label>
+          <input type="text" class="form-control" id="subject" name="subject">
+        </div>
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-loading">
+          <span class="btn-text">Send Message</span>
+        </button>
+      </form>
+
+      <div class="mt-5">
+        <h5>Other Ways to Reach Us</h5>
+        <p class="text-muted mb-1"><i class="bi bi-envelope me-2"></i>support@eventhub.com</p>
+        <p class="text-muted mb-1"><i class="bi bi-telephone me-2"></i>+91 98765 43210</p>
+        <p class="text-muted"><i class="bi bi-geo-alt me-2"></i>Bangalore, India</p>
+      </div>
+    </div>
+  </div>
+</div>

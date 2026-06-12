@@ -1,0 +1,31 @@
+<%
+  function buildPageUrl(pageNum) {
+    var params = {};
+    if (typeof query !== 'undefined' && query) {
+      Object.keys(query).forEach(function(k) {
+        if (query[k] && k !== 'page') params[k] = query[k];
+      });
+    }
+    params.page = pageNum;
+    return '?' + Object.keys(params).map(function(k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+  }
+%>
+<% if (pagination && pagination.pages > 1) { %>
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    <li class="page-item <%= !pagination.hasPrev ? 'disabled' : '' %>">
+      <a class="page-link" href="<%= buildPageUrl(pagination.current - 1) %>">Previous</a>
+    </li>
+    <% pagination.range.forEach(function(p) { %>
+      <li class="page-item <%= p === pagination.current ? 'active' : '' %>">
+        <a class="page-link" href="<%= buildPageUrl(p) %>"><%= p %></a>
+      </li>
+    <% }); %>
+    <li class="page-item <%= !pagination.hasNext ? 'disabled' : '' %>">
+      <a class="page-link" href="<%= buildPageUrl(pagination.current + 1) %>">Next</a>
+    </li>
+  </ul>
+</nav>
+<% } %>

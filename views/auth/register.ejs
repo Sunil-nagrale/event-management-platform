@@ -1,0 +1,49 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="fw-bold text-center mb-4">Create Account</h2>
+          <form action="/auth/register" method="POST">
+            <input type="hidden" name="_redirect" value="/auth/register">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required minlength="6">
+              <div class="form-text">At least 6 characters with one number.</div>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm Password</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <div class="mb-3">
+              <label for="role" class="form-label">Register As</label>
+              <select class="form-select" id="role" name="role">
+                <option value="attendee">Attendee</option>
+                <option value="organizer">Organizer</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 btn-loading">
+              <span class="btn-text">Sign Up</span>
+            </button>
+          </form>
+          <hr>
+          <p class="text-center small mb-0">Already have an account? <a href="/auth/login">Login</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

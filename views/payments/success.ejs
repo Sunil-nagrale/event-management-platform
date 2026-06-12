@@ -1,0 +1,29 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 text-center">
+      <div class="success-icon mb-4">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+      </div>
+      <h1 class="fw-bold text-success">Payment Successful!</h1>
+      <p class="lead text-muted">Your ticket has been confirmed.</p>
+
+      <div class="card shadow-sm border-0 mt-4 text-start">
+        <div class="card-body p-4">
+          <h5><%= booking.event.title %></h5>
+          <hr>
+          <p><strong>Ticket Number:</strong> <code><%= booking.ticketNumber %></code></p>
+          <p><strong>Date:</strong> <%= formatDateTime(booking.event.dateTime.start) %></p>
+          <p><strong>Venue:</strong> <%= booking.event.location.venue %>, <%= booking.event.location.city %></p>
+          <% if (booking.payment) { %>
+            <p><strong>Amount Paid:</strong> <%= formatCurrency(booking.payment.amount) %></p>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex gap-2 justify-content-center">
+        <a href="/user/bookings" class="btn btn-primary">View My Bookings</a>
+        <a href="/events" class="btn btn-outline-secondary">Browse More Events</a>
+      </div>
+    </div>
+  </div>
+</div>

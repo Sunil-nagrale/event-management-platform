@@ -1,0 +1,79 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 text-center">
+          <h2 class="fw-bold mb-3">Checkout</h2>
+          <h4><%= event.title %></h4>
+          <p class="text-muted"><%= formatDateTime(event.dateTime.start) %></p>
+          <p class="text-muted"><i class="bi bi-geo-alt"></i> <%= event.location.venue %>, <%= event.location.city %></p>
+          <h3 class="text-primary my-4"><%= formatCurrency(event.ticketPrice) %></h3>
+          <button id="pay-btn" class="btn btn-primary btn-lg w-100 btn-loading" data-event-id="<%= event._id %>">
+            <span class="btn-text">Pay with Razorpay</span>
+          </button>
+          <a href="/events/<%= event._id %>" class="btn btn-link mt-2">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('pay-btn').addEventListener('click', async function() {
+  const eventId = this.dataset.eventId;
+  const btn = this;
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`/payments/create-order/${eventId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || 'Unable to create order');
+      btn.disabled = false;
+      return;
+    }
+
+    const options = {
+      key: data.key,
+      amount: data.order.amount,
+      currency: data.order.currency,
+      name: 'EventHub',
+      description: '<%= event.title.replace(/'/g, "\\'") %>',
+      order_id: data.order.id,
+      handler: async function(response) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/payments/verify';
+        const fields = {
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          paymentId: data.paymentId
+        };
+        Object.keys(fields).forEach(k => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = k;
+          input.value = fields[k];
+          form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+      },
+      theme: { color: '#6366f1' }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function() {
+      window.location.href = '/payments/failure';
+    });
+    rzp.open();
+  } catch (err) {
+    alert('Payment initialization failed');
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>

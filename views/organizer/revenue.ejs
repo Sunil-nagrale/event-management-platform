@@ -1,0 +1,49 @@
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card dashboard-stat">
+      <h3><%= formatCurrency(totalRevenue) %></h3>
+      <p>Total Revenue</p>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-transparent"><h5 class="mb-0">Revenue by Event</h5></div>
+      <ul class="list-group list-group-flush">
+        <% if (byEvent.length === 0) { %>
+          <li class="list-group-item text-muted">No paid events yet.</li>
+        <% } else { %>
+          <% byEvent.forEach(function(item) { %>
+            <li class="list-group-item d-flex justify-content-between">
+              <span><%= item.event.title %></span>
+              <span><%= formatCurrency(item.revenue) %> (<%= item.count %>)</span>
+            </li>
+          <% }); %>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-transparent"><h5 class="mb-0">Payment History</h5></div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Event</th><th>Attendee</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            <% payments.forEach(function(p) { %>
+              <tr>
+                <td><%= p.event ? p.event.title : 'N/A' %></td>
+                <td><%= p.user.firstName %> <%= p.user.lastName %></td>
+                <td><%= formatCurrency(p.amount) %></td>
+                <td><span class="badge bg-<%= p.status === 'paid' ? 'success' : 'secondary' %>"><%= p.status %></span></td>
+                <td><%= formatDateTime(p.createdAt) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

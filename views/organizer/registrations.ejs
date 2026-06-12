@@ -1,0 +1,28 @@
+<div class="mb-4">
+  <a href="/organizer/events" class="text-decoration-none"><i class="bi bi-arrow-left"></i> Back to Events</a>
+  <h4 class="mt-2"><%= event.title %></h4>
+  <p class="text-muted"><%= event.registeredCount %> / <%= event.capacity %> registered</p>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Ticket</th><th>Name</th><th>Email</th><th>Phone</th><th>Registered</th></tr></thead>
+      <tbody>
+        <% if (bookings.length === 0) { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">No registrations yet.</td></tr>
+        <% } else { %>
+          <% bookings.forEach(function(b) { %>
+            <tr>
+              <td><code><%= b.ticketNumber %></code></td>
+              <td><%= b.user.firstName %> <%= b.user.lastName %></td>
+              <td><%= b.user.email %></td>
+              <td><%= b.user.phone || '-' %></td>
+              <td><%= formatDateTime(b.createdAt) %></td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | EventHub Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <a href="/" class="sidebar-brand">
+        <i class="bi bi-calendar-event"></i> EventHub
+      </a>
+      <nav class="sidebar-nav">
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin" class="sidebar-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <a href="/admin/users" class="sidebar-link"><i class="bi bi-people"></i> Users</a>
+          <a href="/admin/events" class="sidebar-link"><i class="bi bi-calendar3"></i> Events</a>
+          <a href="/admin/registrations" class="sidebar-link"><i class="bi bi-ticket-perforated"></i> Registrations</a>
+        <% } %>
+        <% if (currentUser && (currentUser.role === 'organizer' || currentUser.role === 'admin')) { %>
+          <a href="/organizer" class="sidebar-link"><i class="bi bi-bar-chart"></i> Organizer</a>
+          <a href="/organizer/events" class="sidebar-link"><i class="bi bi-collection"></i> My Events</a>
+          <a href="/events/new" class="sidebar-link"><i class="bi bi-plus-circle"></i> Create Event</a>
+          <a href="/organizer/revenue" class="sidebar-link"><i class="bi bi-currency-rupee"></i> Revenue</a>
+        <% } %>
+        <hr class="sidebar-divider">
+        <a href="/events" class="sidebar-link"><i class="bi bi-search"></i> Browse Events</a>
+        <a href="/user" class="sidebar-link"><i class="bi bi-person"></i> My Account</a>
+      </nav>
+    </aside>
+    <div class="dashboard-main">
+      <header class="dashboard-header">
+        <h1 class="dashboard-title"><%= title %></h1>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-sm btn-outline-secondary theme-toggle" type="button" aria-label="Toggle dark mode">
+            <i class="bi bi-moon-stars"></i>
+          </button>
+          <span class="text-muted small"><%= currentUser ? currentUser.fullName : '' %></span>
+        </div>
+      </header>
+      <div class="dashboard-content">
+        <%- include('../partials/flash') %>
+        <%- body %>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

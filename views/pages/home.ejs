@@ -1,0 +1,65 @@
+<section class="hero-section text-white text-center py-5">
+  <div class="container py-5">
+    <h1 class="display-4 fw-bold mb-3">Discover Amazing Events</h1>
+    <p class="lead mb-4 opacity-75">From tech conferences to cultural festivals — find and book your next experience.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="/events" class="btn btn-light btn-lg px-4">Browse Events</a>
+      <% if (!currentUser) { %>
+        <a href="/auth/register" class="btn btn-outline-light btn-lg px-4">Get Started</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4 text-center mb-5">
+      <div class="col-md-4">
+        <div class="stat-card p-4">
+          <i class="bi bi-calendar3 fs-1 text-primary"></i>
+          <h3 class="mt-2"><%= stats.events %>+</h3>
+          <p class="text-muted mb-0">Active Events</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card p-4">
+          <i class="bi bi-ticket-perforated fs-1 text-success"></i>
+          <h3 class="mt-2"><%= stats.bookings %>+</h3>
+          <p class="text-muted mb-0">Bookings Made</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card p-4">
+          <i class="bi bi-people fs-1 text-info"></i>
+          <h3 class="mt-2"><%= stats.users %>+</h3>
+          <p class="text-muted mb-0">Happy Users</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Upcoming Events</h2>
+      <a href="/events" class="btn btn-outline-primary">View All</a>
+    </div>
+
+    <div class="row g-4">
+      <% if (featuredEvents.length === 0) { %>
+        <div class="col-12 text-center py-5">
+          <p class="text-muted">No upcoming events yet. Check back soon!</p>
+        </div>
+      <% } else { %>
+        <% featuredEvents.forEach(function(event) { %>
+          <%- include('../partials/event-card', { event }) %>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container text-center">
+    <h2 class="fw-bold mb-3">Ready to host your event?</h2>
+    <p class="text-muted mb-4">Join as an organizer and reach thousands of attendees.</p>
+    <a href="/auth/register" class="btn btn-primary btn-lg">Become an Organizer</a>
+  </div>
+</section>

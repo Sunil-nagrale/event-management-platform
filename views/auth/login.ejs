@@ -1,0 +1,30 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="fw-bold text-center mb-4">Welcome Back</h2>
+          <form action="/auth/login" method="POST">
+            <input type="hidden" name="_redirect" value="<%= typeof returnTo !== 'undefined' ? returnTo : '/auth/login' %>">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" required autofocus>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 btn-loading">
+              <span class="btn-text">Login</span>
+            </button>
+          </form>
+          <div class="text-center mt-3">
+            <a href="/auth/forgot-password" class="small text-muted">Forgot password?</a>
+          </div>
+          <hr>
+          <p class="text-center small mb-0">Don't have an account? <a href="/auth/register">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
