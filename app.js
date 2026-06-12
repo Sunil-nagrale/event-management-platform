@@ -31,7 +31,8 @@ const sessionConfig = {
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
+   // secure: process.env.NODE_ENV === 'production'
+    secure:false
   }
 };
 
@@ -41,7 +42,7 @@ if (process.env.MONGODB_URI) {
     touchAfter: 24 * 3600
   });
 }
-
+app.set('trust proxy', 1);
 app.use(session(sessionConfig));
 app.use(flash());
 app.use(passport.initialize());
