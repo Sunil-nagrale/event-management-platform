@@ -206,3 +206,7 @@ Without email configured, messages are logged to the console in development.
 ## License
 
 MIT
+
+## Live Demo
+
+🔗 [Open Event Management Platform](https://event-management-platform-26cc.onrender.com) : https://event-management-platform-26cc.onrender.com
