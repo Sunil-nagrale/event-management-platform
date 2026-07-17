@@ -5,6 +5,7 @@ const { ensureOrganizer, ensureEventOwnerOrAdmin } = require('../middleware/role
 const { upload, handleUploadError } = require('../middleware/upload');
 const { validate } = require('../middleware/validation');
 const { eventValidation } = require('../middleware/validators');
+const { validateObjectId } = require('../middleware/objectId');
 
 router.get('/', eventController.list);
 router.get('/new', ensureOrganizer, eventController.newForm);
@@ -17,10 +18,11 @@ router.post(
   validate,
   eventController.create
 );
-router.get('/:id', eventController.show);
-router.get('/:id/edit', ensureEventOwnerOrAdmin, eventController.editForm);
+router.get('/:id', validateObjectId(), eventController.show);
+router.get('/:id/edit', validateObjectId(), ensureEventOwnerOrAdmin, eventController.editForm);
 router.put(
   '/:id',
+  validateObjectId(),
   ensureEventOwnerOrAdmin,
   upload.single('image'),
   handleUploadError,
@@ -28,6 +30,6 @@ router.put(
   validate,
   eventController.update
 );
-router.delete('/:id', ensureEventOwnerOrAdmin, eventController.delete);
+router.delete('/:id', validateObjectId(), ensureEventOwnerOrAdmin, eventController.delete);
 
 module.exports = router;

@@ -8,9 +8,24 @@
           <p class="text-muted"><%= formatDateTime(event.dateTime.start) %></p>
           <p class="text-muted"><i class="bi bi-geo-alt"></i> <%= event.location.venue %>, <%= event.location.city %></p>
           <h3 class="text-primary my-4"><%= formatCurrency(event.ticketPrice) %></h3>
-          <button id="pay-btn" class="btn btn-primary btn-lg w-100 btn-loading" data-event-id="<%= event._id %>">
-            <span class="btn-text">Pay with Razorpay</span>
-          </button>
+
+          <% if (isPaymentMock) { %>
+            <div class="alert alert-info small text-start">
+              <i class="bi bi-info-circle me-1"></i>
+              Demo mode: Razorpay is not configured. Use the button below to simulate a successful payment.
+            </div>
+            <form id="mock-pay-form" action="/payments/mock-pay" method="POST">
+              <input type="hidden" name="paymentId" id="mock-payment-id">
+              <button type="button" id="mock-pay-btn" class="btn btn-success btn-lg w-100" data-event-id="<%= event._id %>">
+                <i class="bi bi-check-circle me-1"></i> Simulate Payment (Demo)
+              </button>
+            </form>
+          <% } else { %>
+            <button id="pay-btn" class="btn btn-primary btn-lg w-100 btn-loading" data-event-id="<%= event._id %>">
+              <span class="btn-text">Pay with Razorpay</span>
+            </button>
+          <% } %>
+
           <a href="/events/<%= event._id %>" class="btn btn-link mt-2">Cancel</a>
         </div>
       </div>
@@ -18,6 +33,7 @@
   </div>
 </div>
 
+<% if (!isPaymentMock) { %>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 document.getElementById('pay-btn').addEventListener('click', async function() {
@@ -26,7 +42,7 @@ document.getElementById('pay-btn').addEventListener('click', async function() {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`/payments/create-order/${eventId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch('/payments/create-order/' + eventId, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
     const data = await res.json();
 
     if (!data.success) {
@@ -40,9 +56,9 @@ document.getElementById('pay-btn').addEventListener('click', async function() {
       amount: data.order.amount,
       currency: data.order.currency,
       name: 'EventHub',
-      description: '<%= event.title.replace(/'/g, "\\'") %>',
+      description: <%- JSON.stringify(event.title) %>,
       order_id: data.order.id,
-      handler: async function(response) {
+      handler: function(response) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/payments/verify';
@@ -52,7 +68,7 @@ document.getElementById('pay-btn').addEventListener('click', async function() {
           razorpay_signature: response.razorpay_signature,
           paymentId: data.paymentId
         };
-        Object.keys(fields).forEach(k => {
+        Object.keys(fields).forEach(function(k) {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = k;
@@ -77,3 +93,32 @@ document.getElementById('pay-btn').addEventListener('click', async function() {
   }
 });
 </script>
+<% } else { %>
+<script>
+document.getElementById('mock-pay-btn').addEventListener('click', async function() {
+  const eventId = this.dataset.eventId;
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  try {
+    const res = await fetch('/payments/create-order/' + eventId, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || 'Unable to create order');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Simulate Payment (Demo)';
+      return;
+    }
+
+    document.getElementById('mock-payment-id').value = data.paymentId;
+    document.getElementById('mock-pay-form').submit();
+  } catch (err) {
+    alert('Payment failed');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Simulate Payment (Demo)';
+  }
+});
+</script>
+<% } %>

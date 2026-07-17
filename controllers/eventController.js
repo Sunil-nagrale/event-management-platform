@@ -9,7 +9,7 @@ exports.index = async (req, res, next) => {
   try {
     const featuredEvents = await Event.find({ status: 'published', 'dateTime.start': { $gte: new Date() } })
       .populate('organizer', 'firstName lastName')
-      .sort({ dateTime: 1 })
+      .sort({ 'dateTime.start': 1 })
       .limit(6);
 
     const stats = {
@@ -37,7 +37,9 @@ exports.list = async (req, res, next) => {
     const filter = {};
 
     if (search) {
-      filter.$text = { $search: search };
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'i');
+      filter.$or = [{ title: regex }, { description: regex }, { 'location.city': regex }];
     }
 
     if (category) filter.category = category;

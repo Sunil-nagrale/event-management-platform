@@ -15,6 +15,7 @@
                 <td><%= b.event ? formatDateTime(b.event.dateTime.start) : '-' %></td>
                 <td><span class="badge bg-<%= getStatusBadge(b.status) %>"><%= b.status %></span></td>
                 <td>
+                  <a href="/bookings/<%= b._id %>" class="btn btn-sm btn-outline-primary">View</a>
                   <% if (b.status === 'confirmed') { %>
                     <form action="/bookings/<%= b._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Cancel this registration?')">
                       <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>

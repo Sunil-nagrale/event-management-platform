@@ -7,6 +7,12 @@ const ensureOrganizer = [isAuthenticated, hasRole('organizer', 'admin')];
 const ensureAttendee = [isAuthenticated, hasRole('attendee', 'organizer', 'admin')];
 
 const ensureEventOwnerOrAdmin = async (req, res, next) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    req.session.returnTo = req.originalUrl;
+    req.flash('error', 'Please log in to access this page.');
+    return res.redirect('/auth/login');
+  }
+
   try {
     const Event = require('../models/Event');
     const event = await Event.findById(req.params.id);

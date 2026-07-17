@@ -8,6 +8,14 @@ const notFound = (req, res, next) => {
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
+  if (err.name === 'CastError') {
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(400).json({ success: false, message: 'Invalid ID format' });
+    }
+    req.flash('error', 'Invalid resource ID.');
+    return res.redirect('/events');
+  }
+
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 

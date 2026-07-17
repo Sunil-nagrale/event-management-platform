@@ -3,7 +3,49 @@ const razorpay = require('../config/razorpay');
 const Payment = require('../models/Payment');
 const Booking = require('../models/Booking');
 const Event = require('../models/Event');
-const { sendRegistrationConfirmation, sendTicketConfirmation } = require('../utils/email');
+const { sendTicketConfirmation } = require('../utils/email');
+
+const isPaymentMock = () => {
+  const keyId = process.env.RAZORPAY_KEY_ID || '';
+  return (
+    process.env.PAYMENT_MOCK === 'true' ||
+    !keyId ||
+    keyId.includes('placeholder') ||
+    keyId === 'rzp_test_xxxxx'
+  );
+};
+
+const completePayment = async (req, payment, razorpayPaymentId, razorpaySignature) => {
+  const event = await Event.findById(payment.event);
+  if (!event || event.registeredCount >= event.capacity) {
+    payment.status = 'failed';
+    await payment.save();
+    return { ok: false, message: 'Event is no longer available.' };
+  }
+
+  payment.razorpayPaymentId = razorpayPaymentId;
+  payment.razorpaySignature = razorpaySignature;
+  payment.status = 'paid';
+  await payment.save();
+
+  const booking = await Booking.create({
+    user: req.user._id,
+    event: event._id,
+    status: 'confirmed',
+    amount: payment.amount,
+    payment: payment._id
+  });
+
+  payment.booking = booking._id;
+  await payment.save();
+
+  event.registeredCount += 1;
+  await event.save();
+
+  sendTicketConfirmation(req.user, event, booking, payment).catch(console.error);
+
+  return { ok: true, booking };
+};
 
 exports.checkout = async (req, res, next) => {
   try {
@@ -37,14 +79,15 @@ exports.checkout = async (req, res, next) => {
       title: 'Checkout',
       layout: 'layouts/main',
       event,
-      razorpayKeyId: process.env.RAZORPAY_KEY_ID
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+      isPaymentMock: isPaymentMock()
     });
   } catch (error) {
     next(error);
   }
 };
 
-exports.createOrder = async (req, res, next) => {
+exports.createOrder = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId);
     if (!event) {
@@ -57,6 +100,25 @@ exports.createOrder = async (req, res, next) => {
 
     const amountInPaise = Math.round(event.ticketPrice * 100);
     const receipt = `rcpt_${Date.now()}`;
+
+    if (isPaymentMock()) {
+      const mockOrderId = `order_mock_${Date.now()}`;
+      const payment = await Payment.create({
+        user: req.user._id,
+        event: event._id,
+        razorpayOrderId: mockOrderId,
+        amount: event.ticketPrice,
+        receipt,
+        status: 'created'
+      });
+
+      return res.json({
+        success: true,
+        mock: true,
+        paymentId: payment._id,
+        order: { id: mockOrderId, amount: amountInPaise, currency: 'INR' }
+      });
+    }
 
     const order = await razorpay.orders.create({
       amount: amountInPaise,
@@ -84,20 +146,50 @@ exports.createOrder = async (req, res, next) => {
       key: process.env.RAZORPAY_KEY_ID
     });
   } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({ success: false, message: 'Unable to create payment order' });
+    console.error('Create order error:', error.message);
+    res.status(500).json({ success: false, message: 'Unable to create payment order. Check Razorpay credentials.' });
   }
 };
 
-exports.verifyPayment = async (req, res, next) => {
+exports.mockPayment = async (req, res) => {
+  try {
+    if (!isPaymentMock()) {
+      req.flash('error', 'Mock payments are disabled.');
+      return res.redirect('/payments/failure');
+    }
+
+    const { paymentId } = req.body;
+    const payment = await Payment.findById(paymentId);
+
+    if (!payment || payment.user.toString() !== req.user._id.toString()) {
+      req.flash('error', 'Payment record not found.');
+      return res.redirect('/payments/failure');
+    }
+
+    const result = await completePayment(
+      req,
+      payment,
+      `pay_mock_${Date.now()}`,
+      'mock_signature'
+    );
+
+    if (!result.ok) {
+      req.flash('error', result.message);
+      return res.redirect('/payments/failure');
+    }
+
+    req.flash('success', `Payment successful! Ticket: ${result.booking.ticketNumber}`);
+    res.redirect(`/payments/success/${result.booking._id}`);
+  } catch (error) {
+    console.error('Mock payment error:', error);
+    req.flash('error', 'Payment processing failed.');
+    res.redirect('/payments/failure');
+  }
+};
+
+exports.verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentId } = req.body;
-
-    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
-      .digest('hex');
 
     const payment = await Payment.findById(paymentId);
     if (!payment) {
@@ -105,44 +197,30 @@ exports.verifyPayment = async (req, res, next) => {
       return res.redirect('/payments/failure');
     }
 
-    if (expectedSignature !== razorpay_signature) {
-      payment.status = 'failed';
-      await payment.save();
-      req.flash('error', 'Payment verification failed.');
+    if (!isPaymentMock()) {
+      const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+      const expectedSignature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(body)
+        .digest('hex');
+
+      if (expectedSignature !== razorpay_signature) {
+        payment.status = 'failed';
+        await payment.save();
+        req.flash('error', 'Payment verification failed.');
+        return res.redirect('/payments/failure');
+      }
+    }
+
+    const result = await completePayment(req, payment, razorpay_payment_id, razorpay_signature);
+
+    if (!result.ok) {
+      req.flash('error', result.message);
       return res.redirect('/payments/failure');
     }
 
-    const event = await Event.findById(payment.event);
-    if (!event || event.registeredCount >= event.capacity) {
-      payment.status = 'failed';
-      await payment.save();
-      req.flash('error', 'Event is no longer available.');
-      return res.redirect('/payments/failure');
-    }
-
-    payment.razorpayPaymentId = razorpay_payment_id;
-    payment.razorpaySignature = razorpay_signature;
-    payment.status = 'paid';
-    await payment.save();
-
-    const booking = await Booking.create({
-      user: req.user._id,
-      event: event._id,
-      status: 'confirmed',
-      amount: payment.amount,
-      payment: payment._id
-    });
-
-    payment.booking = booking._id;
-    await payment.save();
-
-    event.registeredCount += 1;
-    await event.save();
-
-    sendTicketConfirmation(req.user, event, booking, payment).catch(console.error);
-
-    req.flash('success', `Payment successful! Ticket: ${booking.ticketNumber}`);
-    res.redirect(`/payments/success/${booking._id}`);
+    req.flash('success', `Payment successful! Ticket: ${result.booking.ticketNumber}`);
+    res.redirect(`/payments/success/${result.booking._id}`);
   } catch (error) {
     console.error('Verify payment error:', error);
     req.flash('error', 'Payment processing failed.');
@@ -204,3 +282,5 @@ exports.history = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.isPaymentMock = isPaymentMock;

@@ -1,0 +1,51 @@
+<div class="container py-4">
+  <div class="mb-4">
+    <a href="/user/bookings" class="text-decoration-none"><i class="bi bi-arrow-left"></i> Back to Bookings</a>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-transparent">
+          <h4 class="mb-0">Booking Details</h4>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <span class="badge bg-<%= getStatusBadge(booking.status) %> mb-2"><%= booking.status %></span>
+              <h5><%= booking.event ? booking.event.title : 'Event removed' %></h5>
+            </div>
+            <code class="fs-6"><%= booking.ticketNumber %></code>
+          </div>
+
+          <% if (booking.event) { %>
+            <ul class="list-unstyled event-info-list">
+              <li><i class="bi bi-calendar3 text-primary"></i> <%= formatDateTime(booking.event.dateTime.start) %></li>
+              <li><i class="bi bi-geo-alt text-primary"></i> <%= booking.event.location.venue %>, <%= booking.event.location.city %></li>
+              <li><i class="bi bi-cash text-primary"></i> <%= booking.amount > 0 ? formatCurrency(booking.amount) : 'Free' %></li>
+            </ul>
+          <% } %>
+
+          <% if (booking.payment) { %>
+            <hr>
+            <h6>Payment Info</h6>
+            <p class="mb-1"><strong>Status:</strong> <%= booking.payment.status %></p>
+            <% if (booking.payment.razorpayPaymentId) { %>
+              <p class="mb-0"><strong>Payment ID:</strong> <small><%= booking.payment.razorpayPaymentId %></small></p>
+            <% } %>
+          <% } %>
+
+          <p class="text-muted small mt-3 mb-0">Booked on <%= formatDateTime(booking.createdAt) %></p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <% if (booking.status === 'confirmed' && booking.event) { %>
+            <form action="/bookings/<%= booking._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Cancel this registration?')">
+              <button type="submit" class="btn btn-outline-danger btn-sm">Cancel Registration</button>
+            </form>
+          <% } %>
+          <a href="/events/<%= booking.event ? booking.event._id : '' %>" class="btn btn-outline-primary btn-sm">View Event</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
